@@ -7,7 +7,7 @@ export default function Page() {
 	return (
 		<div className="max-w-3xl mx-auto md:py-10 h-screen">
 			<div className="rounded-lg border h-full">
-				<div className="h-20 border border-white">
+				<div className="h-20">
 					<div className="p-5 border-b flex items-center justify-between h-full">
 						<div>
 							<h1 className="text-xl font-bold">Daily Chat</h1>
