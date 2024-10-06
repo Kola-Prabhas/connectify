@@ -1,25 +1,24 @@
-"use client";
+import { createClient } from "@/lib/supabase/server";
 
-import { Button } from "@/components/ui/button"
+import ChatHeader from "@/components/chat-header";
+import InitUser from "@/components/init-user";
+import ChatInput from "@/components/chat-input";
+import ChatMessages from "@/components/chat-messages";
 
+export default async function Page() {
+	const supabase = createClient();
+	const { data } = await supabase.auth.getSession();
 
-export default function Page() {
 	return (
-		<div className="max-w-3xl mx-auto md:py-10 h-screen">
-			<div className="rounded-lg border h-full">
-				<div className="h-20">
-					<div className="p-5 border-b flex items-center justify-between h-full">
-						<div>
-							<h1 className="text-xl font-bold">Daily Chat</h1>
-							<div className="flex items-center gap-1">
-								<div className="h-4 w-4 bg-green-500 rounded-full animate-pulse"></div>
-								<h1 className="text-sm text-gray-400">2 online</h1>
-							</div>
-						</div>
-						<Button>Login</Button>
-					</div>
+		<>
+			<InitUser user={data?.session?.user} />
+			<div className="max-w-3xl mx-auto md:py-10 h-screen">
+				<div className="rounded-lg border h-full flex flex-col">
+					<ChatHeader user={data?.session?.user} />
+					<ChatMessages />
+					<ChatInput />
 				</div>
 			</div>
-		</div>
+		</>
 	);
 }
