@@ -11,7 +11,7 @@ import { useUser } from '@/lib/store/user';
 import { useMessages } from '@/lib/store/messages';
 
 
-function Message({ message }: MessageProp) {
+function SingleMessage({ message }: MessageProp) {
 	const user = useUser(state => state.user);
 	const setActionMessage = useMessages(state => state.setActionMessage);
 
@@ -67,4 +67,4 @@ function Message({ message }: MessageProp) {
 	 );
 }
 
-export default Message;
+export default SingleMessage;

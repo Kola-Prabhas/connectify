@@ -1,17 +1,22 @@
 'use client';
 
 import { useMessages } from "@/lib/store/messages";
-import Message from "./message";
+import SingleMessage from "./message";
 import { DeleteDialog } from "./delete-dialog";
 import { EditDialog } from "./edit-dialog";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { Message } from "@/lib/types/message";
 
 
 function ListMessages() {
 	const messages = useMessages(state => state.messages);
 	const addMessage = useMessages(state => state.addMessage);
 	const actionMessage = useMessages(state => state.actionMessage);
+	const optimisticEditMessage = useMessages(state => state.optimisticEditMessage);
+	const optimisticDeleteMessage = useMessages(state => state.optimisticDeleteMessage);
+
+	const messagesContainer = useRef<HTMLDivElement | null>(null)
 
 	// TODO: Realtime handlers when a message is deleted and edited
 
@@ -37,26 +42,58 @@ function ListMessages() {
 						users
 					})
 				}
+			})
+			.on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, async payload => {
+				const message = payload.new;
+				const userData = await client.from('users')
+					.select('id, avatar_url, created_at, display_name')
+					.eq('id', message.send_by);
+
+				const users = userData.data?.[0];
+
+				if (users) {
+					optimisticEditMessage({
+						id: message.id,
+						created_at: message.created_at,
+						is_edit: message.is_edit,
+						send_by: message.send_by,
+						text: message.text,
+						users
+					})
+				}
+			})
+			.on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' }, async payload => {
+				const message = payload.old;
+				
+				optimisticDeleteMessage({ id: message.id } as Message)
 			}).subscribe();
-		
 		
 		return () => {
 			subscription.unsubscribe();
 		}
-
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [])
+
+	useEffect(() => {
+		if (messagesContainer.current) {
+			messagesContainer.current.scrollTop = messagesContainer.current.scrollHeight;
+		}
+
+	}, [messages])
 
 	// TODO: Undo the optimistic updates when the request fails
 	// TODO: After a message is edited it's position shouldn't change and it shouldn't be the recent message
 
 	return (
-		<div className="flex-1 flex flex-col p-5 overflow-y-auto">
-			<div className="flex-1"></div>
+		<div
+			ref={messagesContainer}
+			className="beautify-scrollbar flex-1 flex flex-col p-5 overflow-y-auto"
+		>
+			{/* <div className="flex-1"></div> */}
 			<div className="space-y-7">
 				{messages?.map(message => {
 					return (
-						<Message
+						<SingleMessage
 							key={message.id}
 							message={message}
 						/>
@@ -68,6 +105,5 @@ function ListMessages() {
 		</div>
 	);
 }
-
 
 export default ListMessages;
