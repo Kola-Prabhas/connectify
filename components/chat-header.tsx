@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import OnlineUsersCount from "./online-users-count";
 
 import { UserProp } from "@/lib/types/user-prop";
 
@@ -46,11 +47,8 @@ function ChatHeader({ user }: UserProp) {
 		<div className="h-20">
 			<div className="p-5 flex items-center justify-between h-full">
 				<div>
-					<h1 className="text-xl font-bold">Daily Chat</h1>
-					<div className="flex items-center gap-1">
-						<div className="size-2 bg-green-500 rounded-full animate-pulse"></div>
-						<h1 className="text-sm text-gray-400">2 online</h1>
-					</div>
+					<h1 className="text-xl font-bold">Connectify</h1>
+					<OnlineUsersCount />
 				</div>
 				{user ? (
 					<Button onClick={handleLogout}>
